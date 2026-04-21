@@ -7,6 +7,8 @@
 Office.actions.associate("onNewMessageComposeHandler", onNewMessageComposeHandler);
 // Office.actions.associate("onItemChangedHandler", onItemChangedHandler);
 
+console.log("processing launcheventhandler.js");
+
 /**
  * Handles the OnNewMessageCompose event before the task pane is opened.
  * @param {Office.AddinCommands.Event} event - The Office event object.
