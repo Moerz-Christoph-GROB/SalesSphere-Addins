@@ -5,7 +5,7 @@
  * Registers all supported launch event handlers.
  */
 Office.actions.associate("onNewMessageComposeHandler", onNewMessageComposeHandler);
-Office.actions.associate("onItemChangedHandler", onItemChangedHandler);
+// Office.actions.associate("onItemChangedHandler", onItemChangedHandler);
 
 /**
  * Handles the OnNewMessageCompose event before the task pane is opened.
