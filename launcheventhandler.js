@@ -1,12 +1,5 @@
 "use strict";
 
-/**
- * Entry point for event-based activation.
- * Registers all supported launch event handlers.
- */
-Office.actions.associate("onNewMessageComposeHandler", onNewMessageComposeHandler);
-// Office.actions.associate("onItemChangedHandler", onItemChangedHandler);
-
 console.log("processing launcheventhandler.js");
 
 /**
@@ -39,3 +32,11 @@ function onItemChangedHandler(event) {
     console.log("onItemChangedHandler: Item changed.");
     event.completed();
 }
+
+
+/**
+ * Entry point for event-based activation.
+ * Registers all supported launch event handlers.
+ */
+Office.actions.associate("onNewMessageComposeHandler", onNewMessageComposeHandler);
+// Office.actions.associate("onItemChangedHandler", onItemChangedHandler);
