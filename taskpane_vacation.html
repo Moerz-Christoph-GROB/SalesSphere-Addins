@@ -1,0 +1,428 @@
+<!-- Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT License. -->
+<!DOCTYPE html>
+<html>
+
+<head>
+    <!-- Office JavaScript API -->
+    <script type="text/javascript" src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+    <!-- Setze Base URL -->
+    <base href="https://localhost:44304/">
+     <!-- Importiere OllamaConnector als Modul -->
+    <!-- <script type="module">
+        import { OllamaConnector } from './ollamaConnector.js';
+        // Mache die Klasse global verf�gbar
+        window.OllamaConnector = OllamaConnector;
+    </script> -->
+
+</head>
+
+<body>
+   
+<h1>Urlaubsantrag</h1>
+
+    <p>Fetch data from sales cockpit API</p>
+    <button id="cmbFetchAPIData">Fetch API data</button>
+
+    <p>Issue request</p>
+    <button id="cmbIssueRequest">Issue Request</button>
+    
+    <p>Accept request</p>
+    <button id="cmbAcceptRequest">Accept Request</button>
+    
+    <p>Refuse request</p>
+    <button id="cmbRefuseRequest">Refuse Request</button>
+
+   <br>
+   <h1>Emails beantworten</h1>
+   <br>
+
+   <p>Zustimmen</p>
+   <button id="cmbReplyAccept">Reply Accept</button>
+
+   <p>Ablehnen</p>
+   <button id="cmbReplyRefuse">Reply Refuse</button>
+
+   <div id="status-container" style="margin-top: 20px; padding: 10px;">
+    <p id="status-message"></p>
+   </div>
+
+</body>
+
+<script>
+
+    Office.onReady(async (info) => {
+        if (info.host === Office.HostType.Outlook) {
+            try {
+                document.getElementById("cmbFetchAPIData").onclick = subFetchAPIData;
+                document.getElementById("cmbIssueRequest").onclick = subIssueRequest;
+                document.getElementById("cmbAcceptRequest").onclick = subAcceptRequest;
+                document.getElementById("cmbRefuseRequest").onclick = subRefuseRequest;
+                document.getElementById("cmbReplyAccept").onclick = subReplyAccept;
+                document.getElementById("cmbReplyRefuse").onclick = subReplyRefuse;
+            } catch (error) {
+                console.error("Error in Office.onReady:", error);
+            }
+        }
+    });
+
+    async function subFetchAPIData() {
+
+        try {
+            showStatus("Starting data fetch...");
+
+            const strApiUrl = "https://localhost:44304/ProjectReferences/api/ProjectRecords";
+
+            showStatus("Fetching data from API...");
+
+            const response = await fetch(strApiUrl, {
+                method: "GET",
+                headers: {
+                    "Accept": "application/json"
+                },
+                credentials: "include",
+                cache: "no-store"
+            });
+
+            if (!response.ok) {
+                throw new Error("HTTP status " + response.status);
+            }
+
+            showStatus("Processing response data...");
+
+            const data = await response.json();
+            const arrRecords = data.payload;
+            const intRecordCount = arrRecords ? arrRecords.length : 0;
+
+            showStatus("Data fetched successfully. Number of records: " + intRecordCount);
+
+            if (intRecordCount < 1) {
+                showStatus("No records found.");
+                return;
+            }
+
+            const objFirstRecord = arrRecords[0];
+            const strFirstRecordJson = JSON.stringify(objFirstRecord, null, 2);
+            const strMailBody = "<pre>" + strFirstRecordJson + "</pre>";
+
+            await new Promise((resolve, reject) => {
+                Office.context.mailbox.item.body.setAsync(
+                    strMailBody,
+                    { coercionType: "html" },
+                    function (asyncResult) {
+                        if (asyncResult.status === Office.AsyncResultStatus.Failed) {
+                            reject(new Error(asyncResult.error.message));
+                        } else {
+                            resolve();
+                        }
+                    }
+                );
+            });
+
+            showStatus("Done. First record written to mail body. Total records: " + intRecordCount);
+
+        } catch (error) {
+            console.error("subFetchAPIData: Failed to fetch project reference records:", error);
+            showStatus("Error: " + error.message);
+        }
+    }
+
+    /**
+     * Writes 'Hello world!' to a new message body.
+     */
+    function subIssueRequest() {
+          const htmlTemplate = `
+        <div style="font-family: Verdana, sans-serif;">
+            <p style="margin-left: 165pt; text-indent: -165pt;">
+                <b>An:</b> ${Office.context.mailbox.userProfile.emailAddress}
+            </p>
+            <p style="margin-left: 165pt; text-indent: -165pt;">
+                <b>Betreff:</b> [VACATION][REQUEST] ${Office.context.mailbox.userProfile.displayName}
+            </p>
+
+            <h2 style="margin-left: 70.8pt; text-indent: 35.4pt; font-size: 20pt;">
+                Urlaubs-/Ausgangsschein
+            </h2>
+
+            <p><span style="font-size: 10pt;">Name:</span>
+                <b style="font-size: 12pt;"> ${Office.context.mailbox.userProfile.displayName}</b>
+            </p>
+
+            <table style="width: 100%; border-collapse: collapse; margin: 10px 0;">
+                <tr style="height: 19.5pt;">
+                    <td style="width: 123pt; border-bottom: dotted windowtext 1pt;">
+                        <b style="font-size: 10pt;">Tarifurlaub</b>
+                    </td>
+                    <td style="width: 49pt; border-bottom: dotted windowtext 1pt;">vom</td>
+                    <td style="width: 70.85pt; border-bottom: dotted windowtext 1pt; background: #D9D9D9;">___________</td>
+                    <td style="width: 26pt; border-bottom: dotted windowtext 1pt;">bis</td>
+                    <td style="width: 70.85pt; border-bottom: dotted windowtext 1pt; background: #D9D9D9;">___________</td>
+                    <td style="width: 22pt; border-bottom: dotted windowtext 1pt;">=</td>
+                    <td style="width: 2cm; border-bottom: dotted windowtext 1pt; background: #D9D9D9;">___</td>
+                    <td style="width: 69pt; border-bottom: dotted windowtext 1pt;">Tag/e</td>
+                </tr>
+                <tr style="height: 19.5pt;">
+                    <td style="width: 123pt; border-bottom: dotted windowtext 1pt;">
+                        <b style="font-size: 10pt;">Sonderurlaub</b>
+                    </td>
+                    <td style="width: 49pt; border-bottom: dotted windowtext 1pt;">vom</td>
+                    <td style="width: 70.85pt; border-bottom: dotted windowtext 1pt; background: #D9D9D9;">___________</td>
+                    <td style="width: 26pt; border-bottom: dotted windowtext 1pt;">bis</td>
+                    <td style="width: 70.85pt; border-bottom: dotted windowtext 1pt; background: #D9D9D9;">___________</td>
+                    <td style="width: 22pt; border-bottom: dotted windowtext 1pt;">=</td>
+                    <td style="width: 2cm; border-bottom: dotted windowtext 1pt; background: #D9D9D9;">___</td>
+                    <td style="width: 69pt; border-bottom: dotted windowtext 1pt;">Tag/e</td>
+                </tr>
+                <tr style="height: 19.5pt;">
+                    <td style="width: 123pt; border-bottom: dotted windowtext 1pt;">
+                        <b style="font-size: 10pt;">T-ZUG</b>
+                    </td>
+                    <td style="width: 49pt; border-bottom: dotted windowtext 1pt;">vom</td>
+                    <td style="width: 70.85pt; border-bottom: dotted windowtext 1pt; background: #D9D9D9;">___________</td>
+                    <td style="width: 26pt; border-bottom: dotted windowtext 1pt;">bis</td>
+                    <td style="width: 70.85pt; border-bottom: dotted windowtext 1pt; background: #D9D9D9;">___________</td>
+                    <td style="width: 22pt; border-bottom: dotted windowtext 1pt;">=</td>
+                    <td style="width: 2cm; border-bottom: dotted windowtext 1pt; background: #D9D9D9;">___</td>
+                    <td style="width: 69pt; border-bottom: dotted windowtext 1pt;">Tag/e</td>
+                </tr>
+                <tr style="height: 19.5pt;">
+                    <td style="width: 123pt; border-bottom: dotted windowtext 1pt;">
+                        <b style="font-size: 10pt;">Bildungsurlaub</b>
+                    </td>
+                    <td style="width: 49pt; border-bottom: dotted windowtext 1pt;">vom</td>
+                    <td style="width: 70.85pt; border-bottom: dotted windowtext 1pt; background: #D9D9D9;">___________</td>
+                    <td style="width: 26pt; border-bottom: dotted windowtext 1pt;">bis</td>
+                    <td style="width: 70.85pt; border-bottom: dotted windowtext 1pt; background: #D9D9D9;">___________</td>
+                    <td style="width: 22pt; border-bottom: dotted windowtext 1pt;">=</td>
+                    <td style="width: 2cm; border-bottom: dotted windowtext 1pt; background: #D9D9D9;">___</td>
+                    <td style="width: 69pt; border-bottom: dotted windowtext 1pt;">Tag/e</td>
+                </tr>
+                <tr style="height: 19.5pt;">
+                    <td style="width: 123pt; border-bottom: dotted windowtext 1pt;">
+                        <b style="font-size: 10pt;">Zeitkonto</b>
+                    </td>
+                    <td style="width: 49pt; border-bottom: dotted windowtext 1pt;">am</td>
+                    <td style="width: 70.85pt; border-bottom: dotted windowtext 1pt; background: #D9D9D9;">___________</td>
+                    <td style="width: 26pt; border-bottom: dotted windowtext 1pt;">von</td>
+                    <td style="width: 70.85pt; border-bottom: dotted windowtext 1pt; background: #D9D9D9;">___________</td>
+                    <td style="width: 22pt; border-bottom: dotted windowtext 1pt;">bis</td>
+                    <td style="width: 2cm; border-bottom: dotted windowtext 1pt; background: #D9D9D9;">___</td>
+                    <td style="width: 69pt; border-bottom: dotted windowtext 1pt;">Uhr</td>
+                </tr>
+            </table>
+
+            <p style="font-size: 10pt;">Kommentar:</p>
+            <p style="font-size: 10pt;">erstellt am: ${new Date().toLocaleDateString('de-DE')}</p>
+            <p style="font-size: 10pt;">Status: +++ ANFRAGE +++</p>
+        </div>
+    `;
+
+    Office.context.mailbox.item.body.getAsync("html", function (result) {
+        if (result.status === Office.AsyncResultStatus.Succeeded) {
+            const newContent = htmlTemplate + result.value;
+            Office.context.mailbox.item.body.setAsync(
+                newContent,
+                { coercionType: "html" },
+                function (asyncResult) {
+                    if (asyncResult.status === Office.AsyncResultStatus.Failed) {
+                        console.error(asyncResult.error.message);
+                    }
+                }
+            );
+        } else {
+            console.error(result.error.message);
+        }
+    });
+}
+
+    /**
+     * Writes 'Hello world!' to a new message body.
+     */
+    function subAcceptRequest() {
+        Office.context.mailbox.item.body.setAsync(
+            "subAcceptRequest",
+            {
+                coercionType: "html", // Write text as HTML
+            },
+
+            // Callback method to check that setAsync succeeded
+            function (asyncResult) {
+                if (asyncResult.status ==
+                    Office.AsyncResultStatus.Failed) {
+                    console.error(asyncResult.error.message);
+                }
+            }
+        );
+    }
+
+        /**
+     * Writes 'Hello world!' to a new message body.
+     */
+    function subRefuseRequest() {
+        Office.context.mailbox.item.body.setAsync(
+            "subRefuseRequest!",
+            {
+                coercionType: "html", // Write text as HTML
+            },
+
+            // Callback method to check that setAsync succeeded
+            function (asyncResult) {
+                if (asyncResult.status ==
+                    Office.AsyncResultStatus.Failed) {
+                    console.error(asyncResult.error.message);
+                }
+            }
+        );
+    }
+
+async function subReplyRefuse() {
+    try {
+        const result = await new Promise((resolve, reject) => {
+            Office.context.mailbox.item.body.getAsync("html", function(result) {
+                if (result.status === Office.AsyncResultStatus.Succeeded) {
+                    resolve(result);
+                } else {
+                    reject(result.error);
+                }
+            });
+        });
+
+        const originalMail = result.value;
+        const RequestPrompt = "Refuse";
+        const response = await subAnswerEmail(originalMail, RequestPrompt);
+        const newContent = "<p>" + response + "</p>" + originalMail;
+
+        await new Promise((resolve, reject) => {
+            Office.context.mailbox.item.body.setAsync(
+                newContent,
+                { coercionType: "html" },
+                function(asyncResult) {
+                    if (asyncResult.status === Office.AsyncResultStatus.Failed) {
+                        reject(asyncResult.error);
+                    } else {
+                        resolve();
+                    }
+                }
+            );
+        });
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+async function subReplyAccept() {
+    try {
+        const result = await new Promise((resolve, reject) => {
+            Office.context.mailbox.item.body.getAsync("html", function(result) {
+                if (result.status === Office.AsyncResultStatus.Succeeded) {
+                    resolve(result);
+                } else {
+                    reject(result.error);
+                }
+            });
+        });
+
+        const originalMail = result.value;
+        const RequestPrompt = "Accept";
+        const response = await subAnswerEmail(originalMail, RequestPrompt);
+        const newContent = "<p>" + response + "</p>" + originalMail;
+
+        await new Promise((resolve, reject) => {
+            Office.context.mailbox.item.body.setAsync(
+                newContent,
+                { coercionType: "html" },
+                function(asyncResult) {
+                    if (asyncResult.status === Office.AsyncResultStatus.Failed) {
+                        reject(asyncResult.error);
+                    } else {
+                        resolve();
+                    }
+                }
+            );
+        });
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+//async function subAnswerEmail(OrigialMail, RequestPrompt){
+    
+
+//    showStatus("Start Answer!");
+
+//    const ollama = new OllamaConnector();
+//    ollama.ollamaUrl = "http://localhost:11434";
+//    ollama.currentModel = "llama3.2:1b";
+
+
+//    // Version abfragen
+//    const versionResult = await ollama.getLlamaVersion();
+//    if (versionResult.success) {
+//        console.log(`Version: ${versionResult.version}`);
+
+
+//        showStatus(`Version: ${versionResult.version}`);
+
+//    }
+
+//    //await ollama.loadModel()
+
+//    // Completion abrufen
+//    const request = "Answer following Email and " + RequestPrompt + " the content: " + OrigialMail ;
+
+
+//    showStatus(request);
+
+//    const completionResult = await ollama.getCompletion(request);
+//    if (completionResult.success) {
+//        console.log(`Response: ${completionResult.response}`);
+//        showStatus(`Response: ${completionResult.response}`);
+//    }
+
+//    return RequestPrompt;
+//}
+
+async function subReplyAccept() {
+    try {
+        const result = await new Promise((resolve, reject) => {
+            Office.context.mailbox.item.body.getAsync("html", function(result) {
+                if (result.status === Office.AsyncResultStatus.Succeeded) {
+                    resolve(result);
+                } else {
+                    reject(result.error);
+                }
+            });
+        });
+
+        const originalMail = result.value;
+        const RequestPrompt = "Accept";
+        const response = await subAnswerEmail(originalMail, RequestPrompt);
+        const newContent = "<p>" + response + "</p>" + originalMail;
+
+        await new Promise((resolve, reject) => {
+            Office.context.mailbox.item.body.setAsync(
+                newContent,
+                { coercionType: "html" },
+                function(asyncResult) {
+                    if (asyncResult.status === Office.AsyncResultStatus.Failed) {
+                        reject(asyncResult.error);
+                    } else {
+                        resolve();
+                    }
+                }
+            );
+        });
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+
+
+
+function showStatus(message) {
+    document.getElementById("status-message").innerHTML = message;
+}
+
+</script>
+
+</html>
