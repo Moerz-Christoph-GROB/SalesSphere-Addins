@@ -2,35 +2,27 @@
 
 console.log("processing launcheventhandler.js");
 
-/**
- * Handles the OnNewMessageCompose event before the task pane is opened.
- * @param {Office.AddinCommands.Event} event - The Office event object.
- */
 function onNewMessageComposeHandler(event) {
-
-    console.log("onNewMessageComposeHandler: New message compose started.");
-
-    Office.context.mailbox.item.subject.setAsync(
-        "[VT-PR] ",
-        function (asyncResult) {
-            if (asyncResult.status === Office.AsyncResultStatus.Failed) {
-                console.error("onNewMessageComposeHandler: Failed to set subject:", asyncResult.error.message);
-            }
-
-            // Always call event.completed - even on failure
-            event.completed();
-        }
-    );
+  setSubject(event);
 }
+function onNewAppointmentComposeHandler(event) {
+  setSubject(event);
+}
+function setSubject(event) {
+  Office.context.mailbox.item.subject.setAsync(
+    "Set by an event-based add-in!",
+    {
+      "asyncContext": event
+    },
+    function (asyncResult) {
+      // Handle success or error.
+      if (asyncResult.status !== Office.AsyncResultStatus.Succeeded) {
+        console.error("Failed to set subject: " + JSON.stringify(asyncResult.error));
+      }
 
-/**
- * Handles the OnMessageRecipientsChanged event.
- * @param {Office.AddinCommands.Event} event - The Office event object.
- */
-function onItemChangedHandler(event) {
-
-    console.log("onItemChangedHandler: Item changed.");
-    event.completed();
+      // Call event.completed() to signal to the Outlook client that the add-in has completed processing the event.
+      asyncResult.asyncContext.completed();
+    });
 }
 
 
