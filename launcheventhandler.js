@@ -43,3 +43,5 @@ function setSubject(event) {
  */
 Office.actions.associate("onNewMessageComposeHandler", onNewMessageComposeHandler);
 // Office.actions.associate("onItemChangedHandler", onItemChangedHandler);
+
+console.log("finished launcheventhandler.js");
