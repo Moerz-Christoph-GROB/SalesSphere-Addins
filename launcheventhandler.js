@@ -5,13 +5,13 @@ console.log("processing launcheventhandler.js");
 /**
  * Executes when the Office Add-in has finished initializing.
  */
-Office.onReady(async (info) => {
+/*Office.onReady(async (info) => {
     if (info.host === Office.HostType.Outlook) {
         console.log("Office Add-in successfully loaded and ready.");
         // Add your Outlook-specific initialization code here
     }
 });
-
+*/
 
 function onNewMessageComposeHandler(event) {
   setSubject(event);
