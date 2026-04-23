@@ -4,10 +4,10 @@ console.log("processing launcheventhandler.js");
 
 
 function onNewMessageComposeHandler(event) {
-  setSubject(event);
+  // setSubject(event);
 }
 function onNewAppointmentComposeHandler(event) {
-  setSubject(event);
+ // setSubject(event);
 }
 function setSubject(event) {
   Office.context.mailbox.item.subject.setAsync(
