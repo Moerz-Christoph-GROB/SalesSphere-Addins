@@ -3,6 +3,8 @@
 const MAX_RETRY_COUNT = 1;
 const RETRY_DELAY_MS = 300;
 
+ console.log("launcheventhandler.js: is running.");
+
 /**
  * Registers event-based handlers after Office is ready.
  */
