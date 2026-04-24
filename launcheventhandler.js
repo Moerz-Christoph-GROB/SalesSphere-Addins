@@ -11,7 +11,7 @@ Office.onReady(function () {
     console.log("launcheventhandler.js: Office is ready.");
 
     Office.actions.associate("onNewMessageComposeHandler", onNewMessageComposeHandler);
-    Office.actions.associate("onNewAppointmentOrganizer", onNewAppointmentOrganizer);
+    Office.actions.associate("onNewAppointmentOrganizerHandler", onNewAppointmentOrganizerHandler);
 });
 
 /**
@@ -28,9 +28,9 @@ function onNewMessageComposeHandler(event) {
  * Handles the new appointment compose launch event.
  * @param {Office.AddinCommands.Event} event - The Office event object.
  */
-function onNewAppointmentOrganizer(event) {
+function onNewAppointmentOrganizerHandler(event) {
 
-    console.log("onNewAppointmentOrganizer: started.");
+    console.log("onNewAppointmentOrganizerHandler: started.");
     handleComposeEvent(event);
 }
 
