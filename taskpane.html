@@ -14,18 +14,21 @@
         // Mache die Klasse global verf�gbar
         window.OllamaConnector = OllamaConnector;
     </script> -->
-
-    <script>
-        const objCreateTaskPaneNamespace = globalThis.SalesSphere
-            ?.Outlook
-            ?.CreateTaskPane;
-
         
-        if (objCreateTaskPaneNamespace && typeof objCreateTaskPaneNamespace.createTaskPane == "function") {
-            console.warn("createTaskPane: createTaskPane will be called.");
-            objCreateTaskPaneNamespace.createTaskPane();
-        }
+    <script>
+        Office.onReady(function () {
+    
+            const objCreateTaskPaneNamespace = globalThis.SalesSphere
+                ?.Outlook
+                ?.CreateTaskPane;
+    
+            if (objCreateTaskPaneNamespace && typeof objCreateTaskPaneNamespace.createTaskPane === "function") {
+                console.warn("createTaskPane: createTaskPane will be called.");
+                objCreateTaskPaneNamespace.createTaskPane();
+            }
+        });
     </script>
+ 
 
 </head>
 
