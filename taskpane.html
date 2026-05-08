@@ -7,13 +7,25 @@
     <script type="text/javascript" src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
     <script type="text/javascript" src="https://salescockpit.grob.local/office/outlook/taskpane.js"></script>
     <!-- Setze Base URL -->
-    <base href="https://localhost:44304/">
+    <base href="https://github.com/Moerz-Christoph-GROB/SalesSphere-Addins">
      <!-- Importiere OllamaConnector als Modul -->
     <!-- <script type="module">
         import { OllamaConnector } from './ollamaConnector.js';
         // Mache die Klasse global verf�gbar
         window.OllamaConnector = OllamaConnector;
     </script> -->
+
+    <script>
+        const objCreateTaskPaneNamespace = globalThis.SalesSphere
+            ?.Outlook
+            ?.CreateTaskPane;
+
+        
+        if (!objCreateTaskPaneNamespace || typeof objCreateTaskPaneNamespace.createTaskPane !== "function") {
+            console.warn("createTaskPane: createTaskPane is not available.");
+            return;
+        }
+    </script>
 
 </head>
 
