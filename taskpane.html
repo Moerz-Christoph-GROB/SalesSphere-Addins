@@ -21,9 +21,9 @@
             ?.CreateTaskPane;
 
         
-        if (!objCreateTaskPaneNamespace || typeof objCreateTaskPaneNamespace.createTaskPane !== "function") {
-            console.warn("createTaskPane: createTaskPane is not available.");
-            return;
+        if (objCreateTaskPaneNamespace && typeof objCreateTaskPaneNamespace.createTaskPane == "function") {
+            console.warn("createTaskPane: createTaskPane will be called.");
+            await  objCreateTaskPaneNamespace.createTaskPane();
         }
     </script>
 
