@@ -23,7 +23,7 @@
         
         if (objCreateTaskPaneNamespace && typeof objCreateTaskPaneNamespace.createTaskPane == "function") {
             console.warn("createTaskPane: createTaskPane will be called.");
-            await  objCreateTaskPaneNamespace.createTaskPane();
+            objCreateTaskPaneNamespace.createTaskPane();
         }
     </script>
 
