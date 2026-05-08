@@ -23,7 +23,7 @@
                 ?.CreateTaskPane;
     
             if (objCreateTaskPaneNamespace && typeof objCreateTaskPaneNamespace.createTaskPane === "function") {
-                console.warn("createTaskPane: createTaskPane will be called.");
+                console.log("createTaskPane: createTaskPane will be called.");
                 objCreateTaskPaneNamespace.createTaskPane();
             }
         });
